@@ -37,4 +37,8 @@ impl App{
             .map(|troll| format!("{} {}", troll.first_name, troll.last_name))
             .collect())
     }
+
+    pub fn add_troll(&self, troll: Troll) -> Result<(), String> {
+        self.rt.block_on(async { self.db_manager.database_insert(troll).await})
+    }
 }

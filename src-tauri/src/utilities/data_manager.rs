@@ -1,5 +1,6 @@
 use postgrest::Postgrest;
 use serde::de::DeserializeOwned;
+use serde::Serialize;
 use tokio::task::JoinHandle;
 use crate::data::local_models::TableTrait;
 
@@ -33,5 +34,21 @@ impl DbManager {
         return resp.text().await.map_err(|e| e.to_string())
             .and_then(|text| serde_json::from_str(&text)
                 .map_err(|e| e.to_string()));
+    }
+
+    pub async fn database_insert<T: Serialize + TableTrait>(&self, obj: T) -> Result<(), String> {
+        let table_name = T::get_table_name();
+        let body = serde_json::to_string(&obj).map_err(|e| e.to_string())?;
+
+        let response = self.client
+            .from(table_name)
+            .insert(body)
+            .execute().await
+            .map_err(|e| e.to_string())?;
+
+        response.status()
+            .is_success()
+            .then(|| ())
+            .ok_or_else(|| "Failed to insert".to_string())
     }
 }

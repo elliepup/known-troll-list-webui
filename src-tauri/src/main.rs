@@ -12,7 +12,6 @@ mod utilities{
     pub mod data_manager;
     pub mod file_manager;
 }
-
 use utilities::app::App;
 
 
@@ -24,16 +23,18 @@ fn greet(name: &str) -> String {
 fn main() {
     let app = App::new().unwrap();
 
-    match app.get_trolls() {
-        Some(trolls) => {
-            for troll in trolls {
-                println!("{}", troll);
-            }
-        },
-        None => {
-            println!("No trolls found");
-        }
-    }
+    app.get_trolls().unwrap()
+        .iter()
+        .for_each(|troll| println!("{}", troll));
+
+    let new_troll = data::local_models::Troll{
+        id: 10,
+        created_at: chrono::Utc::now(),
+        first_name: String::from("John"),
+        last_name: String::from("Doe"),
+        server: String::from("Sargatanas")
+    };
+    app.add_troll(new_troll).unwrap();
 
     tauri::Builder::default()
         .manage(app)
