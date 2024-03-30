@@ -9,6 +9,7 @@ mod data{
 mod utilities{
     pub mod app;
     pub mod data_manager;
+    pub mod file_manager;
 }
 
 use utilities::app::App;
