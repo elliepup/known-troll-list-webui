@@ -6,20 +6,24 @@ mod data{
     pub mod api_models;
 }
 
+mod utilities{
+    pub mod app;
+    pub mod data_manager;
+}
+
+use utilities::app::App;
+
 
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
-#[tauri::command]
-fn test() {
-    println!("does this thing work");
-}
-
 fn main() {
+    let app = App::new();
+
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet, test])
+        .invoke_handler(tauri::generate_handler![greet])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
