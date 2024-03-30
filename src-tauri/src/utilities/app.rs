@@ -1,10 +1,11 @@
 use tokio::runtime::Runtime;
 use crate::utilities::data_manager::{DbConnectionArgs, DbManager};
 use crate::utilities::file_manager::get_env_from_config;
+use crate::data::local_models::Troll;
 
 pub struct App {
     db_manager: DbManager,
-    _rt: Runtime
+    rt: Runtime
 }
 
 
@@ -24,7 +25,16 @@ impl App{
 
         Ok(App{
             db_manager,
-            _rt: rt
+            rt
         })
+    }
+
+    pub fn get_trolls(&self) -> Option<Vec<String>> {
+        let trolls = self.rt
+            .block_on(async { self.db_manager.get_table::<Troll>().await})
+            .ok()?;
+        Some(trolls.iter()
+            .map(|troll| format!("{} {}", troll.first_name, troll.last_name))
+            .collect())
     }
 }

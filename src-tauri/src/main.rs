@@ -4,6 +4,7 @@
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 mod data{
     pub mod api_models;
+    pub mod local_models;
 }
 
 mod utilities{
@@ -21,9 +22,21 @@ fn greet(name: &str) -> String {
 }
 
 fn main() {
-    let app = App::new();
+    let app = App::new().unwrap();
+
+    match app.get_trolls() {
+        Some(trolls) => {
+            for troll in trolls {
+                println!("{}", troll);
+            }
+        },
+        None => {
+            println!("No trolls found");
+        }
+    }
 
     tauri::Builder::default()
+        .manage(app)
         .invoke_handler(tauri::generate_handler![greet])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
