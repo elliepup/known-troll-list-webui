@@ -11,9 +11,23 @@ mod utilities{
     pub mod app;
     pub mod data_manager;
     pub mod file_manager;
-    pub mod redis_manager;
 }
+
+use tauri::State;
 use utilities::app::App;
+use data::local_models::Troll;
+
+#[tauri::command]
+async fn get_trolls_by_name(tool: State<'_, App>, name: String) -> Result<Vec<Troll>, String> {
+    todo!();
+}
+
+#[tauri::command]
+async fn get_troll_by_id<'a>(tool: &'a State<'a, App>, id: i32) -> Result<&'_ Troll, String> {
+    tool.get_troll_by_id(id)
+        .ok_or_else(|| "Troll not found".to_string())
+        .and_then(|troll| Ok(troll))
+}
 
 
 #[tauri::command]
@@ -25,22 +39,9 @@ fn main() {
     let app = App::new().unwrap();
     app.initialize().unwrap();
 
-    app.get_trolls().unwrap()
-        .iter()
-        .for_each(|troll| println!("{}", troll));
-
-    let new_troll = data::local_models::Troll{
-        id: 10,
-        created_at: chrono::Utc::now(),
-        first_name: String::from("John"),
-        last_name: String::from("Doe"),
-        server: String::from("Sargatanas")
-    };
-    app.add_troll(new_troll).unwrap();
-
     tauri::Builder::default()
         .manage(app)
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![greet, get_trolls_by_name])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
