@@ -18,11 +18,10 @@ use utilities::app::App;
 
 // TODO - Return Troll instead of string in the future, easier to test strings for now
 #[tauri::command]
-async fn get_trolls_by_name(tool: State<'_, App>, name: String) -> Result<Vec<String>, String> {
-    tool.get_trolls_by_name(&name)
-        .iter()
-        .map(|troll| Ok(format!("{} {}", troll.first_name, troll.last_name)))
-        .collect()
+async fn get_trolls_by_name(tool: State<'_, App>, name: String) -> Result<String, String> {
+    serde_json::to_string
+        (&tool.get_trolls_by_name(&name))
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]

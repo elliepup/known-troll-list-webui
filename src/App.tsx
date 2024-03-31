@@ -3,15 +3,23 @@ import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/tauri";
 import "./App.css";
 
+interface Troll {
+    id: number;
+    created_at: string;
+    first_name: string;
+    last_name: string;
+    server: string;
+}
+
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
   const [name, setName] = useState("");
 
   async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-
-      //setGreetMsg(await invoke("get_troll_by_id", { id: parseInt(name) }));
-        setGreetMsg(await invoke("get_trolls_by_name", { name }));
+    const trolls: string = await invoke("get_trolls_by_name", { name });
+    const test = JSON.parse(trolls) as Troll[];
+    const output = test.map((troll) => { return troll.first_name + " " + troll.last_name + " from " + troll.server; });
+    setGreetMsg(`Search: ${name}, ${name}! Here are the trolls: ${output.join(", ")}`);
   }
 
   return (
