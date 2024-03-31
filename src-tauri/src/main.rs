@@ -31,6 +31,13 @@ async fn get_troll_by_id(tool: State<'_, App>, id: i32) -> Result<String, String
         .ok_or_else(|| "Troll not found".to_string())
 }
 
+#[tauri::command]
+async fn get_troll_comments(tool: State<'_, App>, id: i32) -> Result<String, String> {
+    println!("why does this not work");
+    serde_json::to_string
+        (&tool.get_troll_comments(id))
+        .map_err(|e| e.to_string())
+}
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -43,7 +50,7 @@ fn main() {
 
     tauri::Builder::default()
         .manage(app)
-        .invoke_handler(tauri::generate_handler![greet, get_troll_by_id, get_trolls_by_name])
+        .invoke_handler(tauri::generate_handler![greet, get_troll_by_id, get_trolls_by_name, get_troll_comments])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

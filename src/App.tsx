@@ -11,15 +11,27 @@ interface Troll {
     server: string;
 }
 
+interface Comment {
+    id: number;
+    created_at: string;
+    comment: string;
+    troll_id: number;
+    severity: number;
+}
+
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
   const [name, setName] = useState("");
 
   async function greet() {
-    const trolls: string = await invoke("get_trolls_by_name", { name });
-    const test = JSON.parse(trolls) as Troll[];
-    const output = test.map((troll) => { return troll.first_name + " " + troll.last_name + " from " + troll.server; });
-    setGreetMsg(`Search: ${name}, ${name}! Here are the trolls: ${output.join(", ")}`);
+    //const trolls: string = await invoke("get_trolls_by_name", { name });
+    //const test = JSON.parse(trolls) as Troll[];
+    //const output = test.map((troll) => { return troll.first_name + " " + troll.last_name + " from " + troll.server; });
+    //setGreetMsg(`Search: ${name}, ${name}! Here are the trolls: ${output.join(", ")}`);
+    const comments: string = await invoke("get_troll_comments", { id: parseInt(name) });
+    const test = JSON.parse(comments) as Comment[];
+    const output = test.map((comment) => { return `"${comment.severity}/10: ${comment.comment}"`; });
+    setGreetMsg(`Search: ${name}, ${name}! Here are the comments: ${output.join(", ")}`);
   }
 
   return (

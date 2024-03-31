@@ -24,9 +24,10 @@ impl TableTrait for Troll {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Comment {
     pub id: i32,
-    pub created_at: String,
+    pub created_at: DateTime<Utc>,
     pub comment: String,
     pub troll_id: i32,
+    pub severity: i8,
 }
 impl TableTrait for Comment {
     fn get_table_name() -> String {

@@ -2,12 +2,13 @@ use std::collections::HashMap;
 use tokio::runtime::Runtime;
 use crate::utilities::data_manager::{DbConnectionArgs, DbManager};
 use crate::utilities::file_manager::get_env_from_config;
-use crate::data::local_models::{Troll};
+use crate::data::local_models::{Comment, Troll};
 
 pub struct App {
     db_manager: DbManager,
     rt: Runtime,
     trolls: HashMap<i32, Troll>,
+    comments: HashMap<i32, Vec<Comment>>,
 }
 
 
@@ -31,10 +32,21 @@ impl App{
             .map(|troll| (troll.id, troll))
             .collect();
 
+        let comments = rt.block_on(async { db_manager.get_table::<Comment>().await})
+            .map_err(|e| e.to_string())?
+            .into_iter()
+            .fold(HashMap::new(), |mut map, comment| {
+                map.entry(comment.troll_id)
+                    .or_insert_with(Vec::new)
+                    .push(comment);
+                map
+            });
+
         Ok(App{
             db_manager,
             rt,
             trolls,
+            comments
         })
     }
 
@@ -52,6 +64,12 @@ impl App{
             .filter(|troll| troll.first_name.to_lowercase().contains(&lowercase_name)
                 || troll.last_name.to_lowercase().contains(&lowercase_name))
             .collect()
+    }
+
+    pub fn get_troll_comments<T: Into<i32>>(&self, id: T) -> Option<Vec<&Comment>>
+    {
+        self.comments.get(&id.into())
+            .map(|comments| comments.iter().collect())
     }
 
     fn get_trolls(&self) -> Option<Vec<String>> { // Should only be used for testing
