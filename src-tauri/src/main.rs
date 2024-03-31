@@ -15,18 +15,21 @@ mod utilities{
 
 use tauri::State;
 use utilities::app::App;
-use data::local_models::Troll;
 
+// TODO - Return Troll instead of string in the future, easier to test strings for now
 #[tauri::command]
-async fn get_trolls_by_name(tool: State<'_, App>, name: String) -> Result<Vec<Troll>, String> {
-    todo!();
+async fn get_trolls_by_name(tool: State<'_, App>, name: String) -> Result<Vec<String>, String> {
+    tool.get_trolls_by_name(&name)
+        .iter()
+        .map(|troll| Ok(format!("{} {}", troll.first_name, troll.last_name)))
+        .collect()
 }
 
 #[tauri::command]
-async fn get_troll_by_id<'a>(tool: &'a State<'a, App>, id: i32) -> Result<&'_ Troll, String> {
+async fn get_troll_by_id(tool: State<'_, App>, id: i32) -> Result<String, String> {
     tool.get_troll_by_id(id)
+        .map(|troll| format!("{} {}", troll.first_name, troll.last_name))
         .ok_or_else(|| "Troll not found".to_string())
-        .and_then(|troll| Ok(troll))
 }
 
 
@@ -41,7 +44,7 @@ fn main() {
 
     tauri::Builder::default()
         .manage(app)
-        .invoke_handler(tauri::generate_handler![greet, get_trolls_by_name])
+        .invoke_handler(tauri::generate_handler![greet, get_troll_by_id, get_trolls_by_name])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

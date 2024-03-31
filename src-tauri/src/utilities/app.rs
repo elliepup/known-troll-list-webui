@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use tokio::runtime::Runtime;
 use crate::utilities::data_manager::{DbConnectionArgs, DbManager};
 use crate::utilities::file_manager::get_env_from_config;
-use crate::data::local_models::{Troll, Comment};
+use crate::data::local_models::{Troll};
 
 pub struct App {
     db_manager: DbManager,
@@ -44,6 +44,14 @@ impl App{
 
     pub fn get_troll_by_id<T: Into<i32>>(&self, id: T) -> Option<&Troll> {
         self.trolls.get(&id.into())
+    }
+
+    pub fn get_trolls_by_name(&self, name: &str) -> Vec<&Troll> {
+        let lowercase_name = name.to_lowercase();
+        self.trolls.values()
+            .filter(|troll| troll.first_name.to_lowercase().contains(&lowercase_name)
+                || troll.last_name.to_lowercase().contains(&lowercase_name))
+            .collect()
     }
 
     fn get_trolls(&self) -> Option<Vec<String>> { // Should only be used for testing
