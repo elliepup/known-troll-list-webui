@@ -11,6 +11,7 @@ mod utilities{
     pub mod app;
     pub mod data_manager;
     pub mod file_manager;
+    pub mod redis_manager;
 }
 use utilities::app::App;
 
@@ -22,6 +23,7 @@ fn greet(name: &str) -> String {
 
 fn main() {
     let app = App::new().unwrap();
+    app.initialize().unwrap();
 
     app.get_trolls().unwrap()
         .iter()

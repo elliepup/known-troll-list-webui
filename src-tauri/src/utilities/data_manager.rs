@@ -31,9 +31,9 @@ impl DbManager {
             .execute().await
             .map_err(|e| e.to_string())?;
 
-        return resp.text().await.map_err(|e| e.to_string())
+        resp.text().await.map_err(|e| e.to_string())
             .and_then(|text| serde_json::from_str(&text)
-                .map_err(|e| e.to_string()));
+                .map_err(|e| e.to_string()))
     }
 
     pub async fn database_insert<T: Serialize + TableTrait>(&self, obj: T) -> Result<(), String> {
@@ -48,7 +48,7 @@ impl DbManager {
 
         response.status()
             .is_success()
-            .then(|| ())
+            .then_some(())
             .ok_or_else(|| "Failed to insert".to_string())
     }
 }

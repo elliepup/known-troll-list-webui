@@ -1,10 +1,12 @@
 use tokio::runtime::Runtime;
 use crate::utilities::data_manager::{DbConnectionArgs, DbManager};
+use crate::utilities::redis_manager::RedisManager;
 use crate::utilities::file_manager::get_env_from_config;
-use crate::data::local_models::Troll;
+use crate::data::local_models::{Troll, Comment};
 
 pub struct App {
     db_manager: DbManager,
+    redis_manager: RedisManager,
     rt: Runtime
 }
 
@@ -23,10 +25,25 @@ impl App{
         let db_manager = rt.block_on(async { DbManager::new(args).await})
             .map_err(|e| e.to_string())?;
 
+        let redis_manager = RedisManager::new()
+            .map_err(|e| e.to_string())?;
+
         Ok(App{
             db_manager,
+            redis_manager,
             rt
         })
+    }
+
+    pub fn initialize(&self) -> Result<(), String> {
+        self.init_redis()?;
+        Ok(())
+    }
+
+    fn init_redis(&self) -> Result<(), String> {
+        self.redis_manager.set_up_table::<Troll>()?;
+        self.redis_manager.set_up_table::<Comment>()?;
+        Ok(())
     }
 
     pub fn get_trolls(&self) -> Option<Vec<String>> {
